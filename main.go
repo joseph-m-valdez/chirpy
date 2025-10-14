@@ -9,14 +9,11 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/joseph-m-valdez/chirpy/internal/database"
+	"github.com/joseph-m-valdez/chirpy/internal/api"
+	"github.com/joseph-m-valdez/chirpy/internal/config"
+
 	_ "github.com/lib/pq"
 )
-
-type apiConfig struct {
-	fileServerHits 	atomic.Int32
-	db			 			 	*database.Queries
-	platform				string	
-}
 
 func main() {
 	const filepathRoot = "."
@@ -40,25 +37,30 @@ func main() {
 	dbQueries := database.New(dbConn)
 
 
-	apiCfg := apiConfig{
-		fileServerHits: atomic.Int32{},
-		db:							dbQueries,
-		platform:				platform,
+	apiCfg := &config.APIConfig{
+		FileServerHits: atomic.Int32{},
+		DB:							dbQueries,
+		Platform:				platform,
 	}
+	api := api.New(apiCfg)
 
 	mux := http.NewServeMux()
-	fsHandler := apiCfg.middlewareMetricsInc(
+	fsHandler := api.MiddlewareMetricsInc(
 		http.StripPrefix("/app",
 		http.FileServer(http.Dir(filepathRoot))),
 	)
 	mux.Handle("/app/", fsHandler)
 
-	mux.HandleFunc("GET /api/healthz", handlerHealth)
-	mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
-	mux.HandleFunc("POST /api/users", apiCfg.handlerCreateUsers)
+	mux.HandleFunc("GET		/api/healthz", api.HandlerHealth)
 
-	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
-	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
+	mux.HandleFunc("POST	/api/users", api.HandlerCreateUsers)
+
+	mux.HandleFunc("POST	/api/chirps", api.HandlerCreateChirps)
+	mux.HandleFunc("GET		/api/chirps", api.HandlerGetChirps)
+	mux.HandleFunc("GET		/api/chirps/{chirpID}", api.HandlerGetChirp)
+
+	mux.HandleFunc("GET		/admin/metrics", api.HandlerMetrics)
+	mux.HandleFunc("POST	/admin/reset", api.HandlerReset)
 
 	server := &http.Server {
 		Addr: 		":" + port,

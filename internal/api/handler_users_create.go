@@ -1,11 +1,11 @@
-package main
+package api
 
 import (
 	"encoding/json"
 	"net/http"
 )
 
-func (cfg *apiConfig) handlerCreateUsers(w http.ResponseWriter, req *http.Request) {
+func (a *API) HandlerCreateUsers(w http.ResponseWriter, req *http.Request) {
 	type createUserRequest struct {
 		Email	string	`json:"email"`
 	}
@@ -19,7 +19,7 @@ func (cfg *apiConfig) handlerCreateUsers(w http.ResponseWriter, req *http.Reques
 		return
 	}	
 
-	createdUser, err := cfg.db.CreateUser(req.Context(), createUserReq.Email)
+	createdUser, err := a.DB.CreateUser(req.Context(), createUserReq.Email)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't create user", err)
 		return

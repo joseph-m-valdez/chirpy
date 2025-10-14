@@ -1,0 +1,22 @@
+meta {
+  name: Chirps
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/api/chirps
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "body": "Chirping it up in the town",
+    "user_id": "e69e5f9a-68dc-44c2-a959-4229659aed90"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,12 +1,12 @@
-package main
+package api
 
 import (
 	"fmt"
 	"net/http"
 )
 
-func (cfg *apiConfig) handlerReset(w http.ResponseWriter, req *http.Request) {
-	platform := cfg.platform
+func (a *API) HandlerReset(w http.ResponseWriter, req *http.Request) {
+	platform := a.Platform
 
 	if platform != "dev" {
 		err := fmt.Errorf("forbidden")
@@ -14,7 +14,7 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := cfg.db.DeleteUsers(req.Context())
+	err := a.DB.DeleteUsers(req.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't delete users", err)
 		return

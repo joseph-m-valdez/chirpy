@@ -1,0 +1,19 @@
+meta {
+  name: Chirp
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:8080/api/chirps/:chirpID
+  body: none
+  auth: inherit
+}
+
+params:path {
+  chirpID: 9f381f63-3d94-414d-915c-007713cc3c08
+}
+
+settings {
+  encodeUrl: true
+}
