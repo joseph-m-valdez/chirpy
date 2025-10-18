@@ -1,0 +1,19 @@
+meta {
+  name: Revoke Token
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/refresh
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: b2b054f21191df89e02de1940a5e34f59207f15eaa73ae35cc3c8399cd87477f
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/login
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjaGlycHkiLCJzdWIiOiJjMTM0MTJiMy0wZTQ0LTQ3NTgtYTgzZC05ODNlMmFmYWU2ZDAiLCJleHAiOjE3NjA2NjMwMjQsImlhdCI6MTc2MDY2MjY2NH0.F_ZJ9dHpsjBzr_H0Kns5nL9cRZEXGE5wJrMdvf0OyNo
+}
+
+body:json {
+  {
+    "email": "hopper@email.com",
+    "password": "SoSecur3"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

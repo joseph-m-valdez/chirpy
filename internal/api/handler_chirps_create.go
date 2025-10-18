@@ -2,58 +2,61 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/joseph-m-valdez/chirpy/internal/auth"
 	"github.com/joseph-m-valdez/chirpy/internal/database"
 )
 
 func (a *API) HandlerCreateChirps(w http.ResponseWriter, req *http.Request) {
-	type createChirpParams struct {
-		Body   string			`json:"body"`
-		UserID uuid.UUID	`json:"user_id"`
-	}
+    type createChirpParams struct {
+        Body string `json:"body"`
+    }
+    type createChirpResult Chirp
 
-	type createChirpResult Chirp 
+    var params createChirpParams
+    if err := json.NewDecoder(req.Body).Decode(&params); err != nil {
+        respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
+        return
+    }
 
-	decoder := json.NewDecoder(req.Body)
-	params := createChirpParams{}
-	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
-		return
-	}
+    bearer, err := auth.GetBearerToken(req.Header)
+    if err != nil {
+        respondWithError(w, http.StatusUnauthorized, "missing or invalid auth", err)
+        return
+    }
 
-	const maxChirpLength = 140
-	if len(params.Body) > maxChirpLength {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
-		return
-	}
+    userID, err := auth.ValidateJWT(bearer, a.JWTSecret)
+    if err != nil {
+        respondWithError(w, http.StatusUnauthorized, "invalid token", err)
+        return
+    }
 
-	cleanMsg := noNaughtyWords(params.Body)
+    const maxChirpLength = 140
+    if len(params.Body) > maxChirpLength {
+        respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
+        return
+    }
 
-	if params.UserID == uuid.Nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid UUID", fmt.Errorf("uuid is not valid"))
-	}
+    cleanMsg := noNaughtyWords(params.Body)
 
-	createdChirp, err := a.DB.CreateChirp(req.Context(), database.CreateChirpParams{
-		Body:		cleanMsg,
-		UserID:	params.UserID,
-	})
+    createdChirp, err := a.DB.CreateChirp(req.Context(), database.CreateChirpParams{
+        Body:   cleanMsg,
+        UserID: userID,
+    })
+    if err != nil {
+        respondWithError(w, http.StatusInternalServerError, "couldn't create chirp", err)
+        return
+    }
 
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't create chirp", err)
-		return
-	}
-
-	respondWithJSON(w, http.StatusCreated, createChirpResult{
-		ID:					createdChirp.ID,
-		CreatedAt:	createdChirp.CreatedAt,
-		UpdatedAt:	createdChirp.UpdatedAt,
-		Body: 			createdChirp.Body,
-		UserID:			createdChirp.UserID,
-	})
+    respondWithJSON(w, http.StatusCreated, createChirpResult{
+        ID:        createdChirp.ID,
+        CreatedAt: createdChirp.CreatedAt,
+        UpdatedAt: createdChirp.UpdatedAt,
+        Body:      createdChirp.Body,
+        UserID:    createdChirp.UserID,
+    })
 }
 
 func noNaughtyWords(msg string) string {

@@ -26,6 +26,8 @@ func main() {
 
 	dbURL := os.Getenv("DB_URL")
 	platform := os.Getenv("PLATFORM")
+	jwtSecret := os.Getenv("JWT_SEKRET")
+
 	if dbURL == "" {
 		log.Fatal("DB_URL must be set")
 	}
@@ -35,12 +37,11 @@ func main() {
 		log.Fatalf("Error opening database: %s", err)
 	}
 	dbQueries := database.New(dbConn)
-
-
 	apiCfg := &config.APIConfig{
 		FileServerHits: atomic.Int32{},
 		DB:							dbQueries,
 		Platform:				platform,
+		JWTSecret:			jwtSecret,
 	}
 	api := api.New(apiCfg)
 
@@ -50,9 +51,12 @@ func main() {
 		http.FileServer(http.Dir(filepathRoot))),
 	)
 	mux.Handle("/app/", fsHandler)
-
 	mux.HandleFunc("GET		/api/healthz", api.HandlerHealth)
+	
+	mux.HandleFunc("POST	/api/refresh", api.HandlerRefreshToken)
+	mux.HandleFunc("POST	/api/revoke", api.HandlerRevokeToken)
 
+	mux.HandleFunc("POST	/api/login", api.HandlerLogin)
 	mux.HandleFunc("POST	/api/users", api.HandlerCreateUsers)
 
 	mux.HandleFunc("POST	/api/chirps", api.HandlerCreateChirps)

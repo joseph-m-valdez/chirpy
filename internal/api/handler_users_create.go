@@ -3,11 +3,15 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/joseph-m-valdez/chirpy/internal/database"
+	"github.com/joseph-m-valdez/chirpy/internal/auth"
 )
 
 func (a *API) HandlerCreateUsers(w http.ResponseWriter, req *http.Request) {
 	type createUserRequest struct {
-		Email	string	`json:"email"`
+		Password 	string	`json:"password"`
+		Email			string	`json:"email"`
 	}
 
 	type createUserResponse User
@@ -19,7 +23,16 @@ func (a *API) HandlerCreateUsers(w http.ResponseWriter, req *http.Request) {
 		return
 	}	
 
-	createdUser, err := a.DB.CreateUser(req.Context(), createUserReq.Email)
+	pw, err := auth.HashPassword(createUserReq.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not create user", err)
+		return
+	}
+
+	createdUser, err := a.DB.CreateUser(req.Context(), database.CreateUserParams{
+		Email:					createUserReq.Email,
+		HashedPassword:	pw,
+	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't create user", err)
 		return
