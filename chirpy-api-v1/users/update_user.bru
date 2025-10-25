@@ -1,0 +1,26 @@
+meta {
+  name: User
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8080/api/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjaGlycHkiLCJzdWIiOiI1ZDAwZmJmZS1lNTQ1LTQ3ODgtOTVjZS0zOWMwNWVlMTExMTgiLCJleHAiOjE3NjE0MzU2NjUsImlhdCI6MTc2MTQzMjA2NX0.igCFj-W0qHHO3RZfEelzcceHkgP6Nz_CaDPfvKiKBnQ
+}
+
+body:json {
+  {
+    "email": "hoppe41@email.com",
+    "password": "SoSecur3!!"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

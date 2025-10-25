@@ -57,11 +57,15 @@ func main() {
 	mux.HandleFunc("POST	/api/revoke", api.HandlerRevokeToken)
 
 	mux.HandleFunc("POST	/api/login", api.HandlerLogin)
-	mux.HandleFunc("POST	/api/users", api.HandlerCreateUsers)
 
-	mux.HandleFunc("POST	/api/chirps", api.HandlerCreateChirps)
-	mux.HandleFunc("GET		/api/chirps", api.HandlerGetChirps)
-	mux.HandleFunc("GET		/api/chirps/{chirpID}", api.HandlerGetChirp)
+
+	mux.HandleFunc("POST	/api/users", api.HandlerCreateUsers)
+	mux.HandleFunc("PUT		/api/users", api.HandlerUpdateUsersAuth)
+
+	mux.HandleFunc("POST			/api/chirps", api.HandlerCreateChirps)
+	mux.HandleFunc("GET				/api/chirps", api.HandlerGetChirps)
+	mux.HandleFunc("GET				/api/chirps/{chirpID}", api.HandlerGetChirp)
+	mux.HandleFunc("DELETE		/api/chirps/{chirpID}", api.HandlerDeleteChirp)
 
 	mux.HandleFunc("GET		/admin/metrics", api.HandlerMetrics)
 	mux.HandleFunc("POST	/admin/reset", api.HandlerReset)
