@@ -43,7 +43,8 @@ func (q *Queries) CreateChirp(ctx context.Context, arg CreateChirpParams) (Chirp
 }
 
 const deleteChirp = `-- name: DeleteChirp :exec
-DELETE FROM chirps WHERE id = $1 AND user_id = $2
+DELETE FROM chirps
+WHERE id = $1 AND user_id = $2
 `
 
 type DeleteChirpParams struct {

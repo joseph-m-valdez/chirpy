@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -20,7 +21,7 @@ VALUES (
 	$1,
 	$2
 )
-RETURNING id, created_at, updated_at, email, hashed_password
+RETURNING id, created_at, updated_at, email, hashed_password, is_chirpy_red
 `
 
 type CreateUserParams struct {
@@ -37,6 +38,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -60,7 +62,7 @@ func (q *Queries) DeleteUsers(ctx context.Context) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, created_at, updated_at, email, hashed_password
+SELECT id, created_at, updated_at, email, hashed_password, is_chirpy_red
 	FROM users WHERE email = $1
 `
 
@@ -73,6 +75,7 @@ func (q *Queries) GetUser(ctx context.Context, email string) (User, error) {
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -84,7 +87,7 @@ SET
 	hashed_password = $2,
 	updated_at = NOW()
 WHERE id = $3
-RETURNING id, created_at, updated_at, email, hashed_password
+RETURNING id, created_at, updated_at, email, hashed_password, is_chirpy_red
 `
 
 type UpdateUserAuthParams struct {
@@ -102,6 +105,42 @@ func (q *Queries) UpdateUserAuth(ctx context.Context, arg UpdateUserAuthParams) 
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
+	)
+	return i, err
+}
+
+const updateUserMembership = `-- name: UpdateUserMembership :one
+UPDATE users
+SET
+	is_chirpy_red = $1,
+	updated_at = NOW()
+WHERE id = $2
+RETURNING id, created_at, updated_at, email, is_chirpy_red
+`
+
+type UpdateUserMembershipParams struct {
+	IsChirpyRed bool
+	ID          uuid.UUID
+}
+
+type UpdateUserMembershipRow struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Email       string
+	IsChirpyRed bool
+}
+
+func (q *Queries) UpdateUserMembership(ctx context.Context, arg UpdateUserMembershipParams) (UpdateUserMembershipRow, error) {
+	row := q.db.QueryRowContext(ctx, updateUserMembership, arg.IsChirpyRed, arg.ID)
+	var i UpdateUserMembershipRow
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }

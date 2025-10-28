@@ -67,5 +67,6 @@ func (a *API) HandlerLogin(w http.ResponseWriter, req *http.Request) {
 		Email:				user.Email,
 		Token:				token,
 		RefreshToken:	refreshToken,
+		IsChirpyRed:	user.IsChirpyRed,
 	})
 }
