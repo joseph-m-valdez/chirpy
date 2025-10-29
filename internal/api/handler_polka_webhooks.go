@@ -20,14 +20,14 @@ func (a *API) HandlerPolkaWebHooks(w http.ResponseWriter, req *http.Request) {
 
 	var reqParams requestParams
 
-	polkaApiKey, err := auth.GetAPIKey(req.Header)
+	polkaAPIKey, err := auth.GetAPIKey(req.Header)
 
-	if polkaApiKey != a.PolkaKey {
+	if polkaAPIKey != a.PolkaKey {
 		respondWithError(w, http.StatusUnauthorized, "Invalid api key", err)
 		return
 	}
 
-	if err := json.NewDecoder(req.Body).Decode(&reqParams); err != nil {
+	if err = json.NewDecoder(req.Body).Decode(&reqParams); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't decode parameters", err)
 		return
 	}
