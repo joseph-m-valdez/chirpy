@@ -27,6 +27,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	platform := os.Getenv("PLATFORM")
 	jwtSecret := os.Getenv("JWT_SEKRET")
+	polkaKey := os.Getenv("POLKA_KEY")
 
 	if dbURL == "" {
 		log.Fatal("DB_URL must be set")
@@ -42,6 +43,7 @@ func main() {
 		DB:							dbQueries,
 		Platform:				platform,
 		JWTSecret:			jwtSecret,
+		PolkaKey:				polkaKey,
 	}
 	api := api.New(apiCfg)
 
